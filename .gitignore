@@ -1,0 +1,10 @@
+# Local configuration and Python environment
+.env
+.env.*
+.venv/
+
+# Generated Python files and browser data
+__pycache__/
+*.py[cod]
+/.browser-profile/
+/.cache/
