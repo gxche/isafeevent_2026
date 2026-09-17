@@ -106,7 +106,9 @@ class Answerer:
                     response = self.client.models.generate_content(
                         model=self.model, contents=prompt,
                         config={"response_mime_type": "application/json", "response_json_schema": schema,
-                                "max_output_tokens": MAX_OUTPUT_TOKENS},
+                                "max_output_tokens": MAX_OUTPUT_TOKENS,
+                                # No tools are used; disabling AFC avoids the SDK's AFC path and warning.
+                                "automatic_function_calling": {"disable": True}},
                     )
                     reason = str(response.candidates[0].finish_reason).split(".")[-1] if response.candidates else None
                     if reason == "MAX_TOKENS":
