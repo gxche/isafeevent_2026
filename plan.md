@@ -11,7 +11,6 @@ isafeevent_2026/
 ├── quiz_runner.py
 ├── ai_answers.py
 ├── requirements.txt
-├── requirements-lock.txt
 ├── README.md
 ├── plan.md
 └── .gitignore
@@ -23,8 +22,7 @@ isafeevent_2026/
 | `bot_openai.py` | OpenAI 執行入口 |
 | `quiz_runner.py` | 命令列參數、Chrome、手動登入、解析題目、選取答案與確認結果頁 |
 | `ai_answers.py` | 讀取設定、API 呼叫、答案格式驗證、有限次重試與執行期間快取 |
-| `requirements.txt` | 直接依賴的固定版本，供使用者安裝 |
-| `requirements-lock.txt` | 已驗證 Windows／Python 3.14 環境的完整版本清單，不是套件本體 |
+| `requirements.txt` | 不限制版本的直接依賴清單，供使用者安裝；更新已安裝套件需加 `--upgrade` |
 
 `.env` 由使用者在本機建立，Git 會忽略它。安裝後的 `.venv/`、執行產生的 `.browser-profile/`、`.cache/` 與 Python 快取也不提交。
 

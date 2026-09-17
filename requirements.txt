@@ -1,5 +1,4 @@
-# Validated release versions (2026-09-16); Python 3.10+.
-selenium==4.49.0
-google-genai==1.75.0
-openai==2.54.0
-python-dotenv==1.2.3
+selenium
+google-genai
+openai
+python-dotenv
