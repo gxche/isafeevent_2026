@@ -40,7 +40,7 @@ isafeevent_2026/
 
 ## API 與答案處理
 
-- Gemini：`google-genai` 的 `models.generate_content`，預設 `gemini-3.5-flash-lite`。
+- Gemini：`google-genai` 的 `models.generate_content`，預設 `gemini-3.5-flash-lite`；未使用工具，明確關閉自動函式呼叫（AFC），避免 SDK 警告。
 - OpenAI：Responses API，預設 `gpt-5.4-nano`，`store=False`。
 - 回傳格式為 `{"choice": N}`，使用從 1 開始的選項編號；JSON Schema 與程式共同驗證範圍。
 - 不使用推理模型；輸出上限 `MAX_OUTPUT_TOKENS = 1024`。
