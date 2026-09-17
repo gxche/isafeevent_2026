@@ -36,7 +36,7 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-`requirements.txt` 包含 `selenium`、`google-genai`、`openai`、`python-dotenv`，不限制版本。pip 會解析適用於目前 Python 的相依套件；已安裝且符合需求的套件可能直接沿用。
+`requirements.txt` 包含 `selenium`、`google-genai`、`openai`、`python-dotenv`，只設定程式所需的最低版本。pip 會解析適用於目前 Python 的相依套件；已安裝且符合需求的套件可能直接沿用。
 
 日後若要更新已安裝套件，執行：
 
@@ -102,6 +102,9 @@ OPENAI_MODEL=gpt-5.4-nano
 
 # 僅測試一次 API，不開啟網站、不提交評量（可能產生少量 API 費用）
 .\.venv\Scripts\python.exe bot_gemini.py --test-api
+
+# 出錯時顯示詳細錯誤，並將截圖與頁面 HTML 存到 .cache\debug（含個人頁面內容，請勿分享）
+.\.venv\Scripts\python.exe bot_gemini.py --debug
 
 # 查看參數
 .\.venv\Scripts\python.exe bot_gemini.py --help

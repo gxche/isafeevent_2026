@@ -22,7 +22,7 @@ isafeevent_2026/
 | `bot_openai.py` | OpenAI 執行入口 |
 | `quiz_runner.py` | 命令列參數、Chrome、手動登入、解析題目、選取答案與確認結果頁 |
 | `ai_answers.py` | 讀取設定、API 呼叫、答案格式驗證、有限次重試與執行期間快取 |
-| `requirements.txt` | 不限制版本的直接依賴清單，供使用者安裝；更新已安裝套件需加 `--upgrade` |
+| `requirements.txt` | 只設最低版本的直接依賴清單，供使用者安裝；更新已安裝套件需加 `--upgrade` |
 
 `.env` 由使用者在本機建立，Git 會忽略它。安裝後的 `.venv/`、執行產生的 `.browser-profile/`、`.cache/` 與 Python 快取也不提交。
 
@@ -36,7 +36,7 @@ isafeevent_2026/
 6. 驗證模型回傳的選項編號，再選取對應 radio。
 7. 全部作答後送出；確認結果頁才計入完成。
 
-正常執行預設一次。`--attempts` 指定次數，`--delay` 指定間隔；`--test-api` 僅呼叫一題 API，不開啟活動網站。
+正常執行預設一次。`--attempts` 指定次數，`--delay` 指定間隔；`--test-api` 僅呼叫一題 API，不開啟活動網站；`--debug` 在出錯時印出 traceback，並存截圖與頁面 HTML 至 `.cache/debug/`。
 
 ## API 與答案處理
 
