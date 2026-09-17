@@ -9,6 +9,7 @@ from dotenv import dotenv_values
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_MODELS = {"gemini": "gemini-3.5-flash-lite", "openai": "gpt-5.4-nano"}
+MAX_OUTPUT_TOKENS = 1024
 
 
 class AnswerError(RuntimeError):
@@ -92,20 +93,26 @@ class Answerer:
                 if self.provider == "openai":
                     response = self.client.responses.create(
                         model=self.model, input=prompt, store=False,
-                        max_output_tokens=1024,
+                        max_output_tokens=MAX_OUTPUT_TOKENS,
                         text={"format": {"type": "json_schema", "name": "quiz_answer", "strict": True, "schema": schema}},
                     )
                     if response.status != "completed":
-                        raise AnswerError("OpenAI 回覆未完成；本題未作答")
+                        reason = getattr(response.incomplete_details, "reason", None)
+                        if reason == "max_output_tokens":
+                            raise AnswerError("OpenAI 回覆超過輸出 token 上限；本題未作答")
+                        raise AnswerError(f"OpenAI 回覆未完成（{reason or response.status}）；本題未作答")
                     text = response.output_text
                 else:
                     response = self.client.models.generate_content(
                         model=self.model, contents=prompt,
                         config={"response_mime_type": "application/json", "response_json_schema": schema,
-                                "max_output_tokens": 1024},
+                                "max_output_tokens": MAX_OUTPUT_TOKENS},
                     )
-                    if not response.candidates or str(response.candidates[0].finish_reason).split(".")[-1] != "STOP":
-                        raise AnswerError("Gemini 回覆未完成或被攔截；本題未作答")
+                    reason = str(response.candidates[0].finish_reason).split(".")[-1] if response.candidates else None
+                    if reason == "MAX_TOKENS":
+                        raise AnswerError("Gemini 回覆超過輸出 token 上限；本題未作答")
+                    if reason != "STOP":
+                        raise AnswerError(f"Gemini 回覆未完成或被攔截（{reason or '無候選回覆'}）；本題未作答")
                     text = response.text
                 result = parse_answer(text, len(options))
                 self.cache[cache_key] = result

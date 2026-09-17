@@ -3,6 +3,7 @@ import argparse
 import os
 import re
 import time
+import traceback
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
@@ -36,6 +37,12 @@ class Question:
     options: list[Option]
 
 
+def css_string(value):
+    """Quote a value for use inside a CSS attribute selector."""
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\a ")
+    return f'"{escaped}"'
+
+
 def read_questions(driver):
     questions = []
     for block in driver.find_elements(By.CSS_SELECTOR, QUESTION_SELECTOR):
@@ -47,11 +54,10 @@ def read_questions(driver):
         headings = block.find_elements(By.CSS_SELECTOR, "h4")
         if len(headings) != 1 or not headings[0].text.strip():
             raise QuizError("無法辨識題目標題")
-        labels = block.find_elements(By.TAG_NAME, "label")
         options = []
         for radio in radios:
             radio_id = radio.get_attribute("id")
-            matching = [label for label in labels if radio_id and label.get_attribute("for") == radio_id]
+            matching = block.find_elements(By.CSS_SELECTOR, f"label[for={css_string(radio_id)}]") if radio_id else []
             if len(matching) != 1 or not matching[0].text.strip():
                 raise QuizError("無法將選項文字對應至 radio；停止答題")
             options.append(Option(matching[0].text.strip(), radio, matching[0]))
@@ -164,11 +170,36 @@ def nonnegative_int(value):
     return number
 
 
+def pause(prompt):
+    # Used inside error handlers: a second Ctrl+C or closed stdin must not mask the original stop.
+    try:
+        input(prompt)
+    except (EOFError, KeyboardInterrupt):
+        print()
+
+
+def save_debug(driver):
+    """Print the traceback and, when a browser is open, save a screenshot and page HTML under .cache/debug."""
+    traceback.print_exc()
+    if driver is None:
+        return
+    try:
+        folder = ROOT / ".cache" / "debug"
+        folder.mkdir(parents=True, exist_ok=True)
+        stem = folder / time.strftime("%Y%m%d-%H%M%S")
+        driver.save_screenshot(str(stem.with_suffix(".png")))
+        stem.with_suffix(".html").write_text(driver.page_source, encoding="utf-8")
+        print(f"除錯資料已存至 {stem}.png / .html（含頁面內容，請勿分享）", flush=True)
+    except Exception as exc:
+        print(f"無法儲存除錯資料：{type(exc).__name__}", flush=True)
+
+
 def run(provider, argv=None):
     parser = argparse.ArgumentParser(description="2026 數位素養評量：手動登入後開始")
     parser.add_argument("--attempts", type=positive_int, default=1, help="評量次數，預設 1")
     parser.add_argument("--delay", type=nonnegative_int, default=10, help="兩次評量間隔秒數")
     parser.add_argument("--test-api", action="store_true", help="只呼叫一次 API 測試，不開啟網站")
+    parser.add_argument("--debug", action="store_true", help="出錯時顯示 traceback，並將截圖與頁面 HTML 存到 .cache/debug")
     args = parser.parse_args(argv)
     driver = answerer = None
     try:
@@ -193,16 +224,21 @@ def run(provider, argv=None):
         return 0
     except (AnswerError, QuizError) as exc:
         print(f"停止：{exc}", flush=True)
+        if args.debug:
+            save_debug(driver)
         if driver is not None:
-            input("請查看瀏覽器狀態，按 Enter 關閉：")
+            pause("請查看瀏覽器狀態，按 Enter 關閉：")
         return 1
     except (EOFError, KeyboardInterrupt):
         print("已取消")
         return 1
     except Exception as exc:
-        print(f"停止：{type(exc).__name__}；請檢查瀏覽器、網路及套件版本", flush=True)
+        hint = "" if args.debug else "；可加 --debug 查看詳細資訊"
+        print(f"停止：{type(exc).__name__}；請檢查瀏覽器、網路及套件版本{hint}", flush=True)
+        if args.debug:
+            save_debug(driver)
         if driver is not None:
-            input("請查看瀏覽器狀態，按 Enter 關閉：")
+            pause("請查看瀏覽器狀態，按 Enter 關閉：")
         return 1
     finally:
         if answerer is not None:

@@ -36,7 +36,7 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-`requirements.txt` 包含 `selenium`、`google-genai`、`openai`、`python-dotenv`，不限制版本。pip 會解析適用於目前 Python 的相依套件；已安裝且符合需求的套件可能直接沿用。
+`requirements.txt` 包含 `selenium`、`google-genai`、`openai`、`python-dotenv`，只設定程式所需的最低版本。pip 會解析適用於目前 Python 的相依套件；已安裝且符合需求的套件可能直接沿用。
 
 日後若要更新已安裝套件，執行：
 
@@ -58,13 +58,7 @@ py -m venv .venv
 
 ## 設定金鑰
 
-在程式所在資料夾自行建立 `.env`，可使用記事本：
-
-```text
-notepad .env
-```
-
-若檔案不存在，選擇建立新檔；另存時選「所有檔案」、UTF-8 編碼，確認檔名是 `.env` 而非 `.env.txt`。若已有 `.env`，只修改需要的設定，保留現有金鑰。
+在程式所在資料夾自行建立 `.env`
 
 填入要使用的供應商金鑰，另一家可留空：
 
@@ -74,8 +68,6 @@ OPENAI_API_KEY=
 GEMINI_MODEL=gemini-3.5-flash-lite
 OPENAI_MODEL=gpt-5.4-nano
 ```
-
-
 
 ## 使用
 
@@ -103,6 +95,9 @@ OPENAI_MODEL=gpt-5.4-nano
 # 僅測試一次 API，不開啟網站、不提交評量（可能產生少量 API 費用）
 .\.venv\Scripts\python.exe bot_gemini.py --test-api
 
+# 出錯時顯示詳細錯誤，並將截圖與頁面 HTML 存到 .cache\debug（含個人頁面內容，請勿分享）
+.\.venv\Scripts\python.exe bot_gemini.py --debug
+
 # 查看參數
 .\.venv\Scripts\python.exe bot_gemini.py --help
 ```
@@ -112,20 +107,20 @@ OpenAI 使用相同參數，將檔名換成 `bot_openai.py` 即可。
 ## 常見問題
 
 
-| 狀況                      | 處理方式                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------- |
+| 狀況                      | 處理方式                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------ |
 | 找不到`py`                | 安裝 Python 後重新開啟 Terminal；若已有`python`，可用 `python -m venv .venv`。 |
-| 缺少套件                  | 使用`.\.venv\Scripts\python.exe`，重新執行上面的安裝指令。                       |
-| 找不到`requirements.txt`  | 先切換到包含該檔案的專案資料夾，再執行安裝。                                     |
-| 找不到`.venv` 中的 Python | 確認目前目錄正確，並已成功執行建立環境的步驟。                                   |
-| 顯示`No module named pip` | 執行`.\.venv\Scripts\python.exe -m ensurepip --upgrade`，再重試安裝套件。        |
-| 找不到金鑰                | 檢查`.env` 的位置、檔名及所選供應商欄位是否已填寫。                              |
-| API 401／403／模型不可用  | 檢查金鑰、模型名稱與帳號權限。                                                   |
-| API 429                   | 檢查配額或呼叫頻率，稍後再試。                                                   |
-| Chrome 無法開啟           | 關閉之前由腳本開啟的專用 Chrome，確認沒有同時執行另一支腳本。                    |
-| 登入失效                  | 在腳本開啟的 Chrome 重新手動登入。                                               |
-| 題目格式錯誤或送出逾時    | 查看網站狀態；若已點擊最後送出，先確認是否完成，避免重複提交。                   |
-| 搬移資料夾後無法執行      | 在新位置重新建立`.venv` 並安裝套件。                                             |
+| 缺少套件                  | 使用`.\.venv\Scripts\python.exe`，重新執行上面的安裝指令。                     |
+| 找不到`requirements.txt`  | 先切換到包含該檔案的專案資料夾，再執行安裝。                                   |
+| 找不到`.venv` 中的 Python | 確認目前目錄正確，並已成功執行建立環境的步驟。                                 |
+| 顯示`No module named pip` | 執行`.\.venv\Scripts\python.exe -m ensurepip --upgrade`，再重試安裝套件。      |
+| 找不到金鑰                | 檢查`.env` 的位置、檔名及所選供應商欄位是否已填寫。                            |
+| API 401／403／模型不可用  | 檢查金鑰、模型名稱與帳號權限。                                                 |
+| API 429                   | 檢查配額或呼叫頻率，稍後再試。                                                 |
+| Chrome 無法開啟           | 關閉之前由腳本開啟的專用 Chrome，確認沒有同時執行另一支腳本。                  |
+| 登入失效                  | 在腳本開啟的 Chrome 重新手動登入。                                             |
+| 題目格式錯誤或送出逾時    | 查看網站狀態；若已點擊最後送出，先確認是否完成，避免重複提交。                 |
+| 搬移資料夾後無法執行      | 在新位置重新建立`.venv` 並安裝套件。                                           |
 
 出錯時會停止，不會隨機作答或繼續送出未完成的頁面；第一頁可能已送出。可按 `Ctrl+C` 中止。
 
