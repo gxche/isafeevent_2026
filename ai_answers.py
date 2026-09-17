@@ -9,8 +9,7 @@ from dotenv import dotenv_values
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_MODELS = {"gemini": "gemini-3.5-flash-lite", "openai": "gpt-5.4-nano"}
-# Reasoning/thinking models spend output tokens before the JSON answer; leave headroom.
-MAX_OUTPUT_TOKENS = 4096
+MAX_OUTPUT_TOKENS = 1024
 
 
 class AnswerError(RuntimeError):
@@ -100,7 +99,7 @@ class Answerer:
                     if response.status != "completed":
                         reason = getattr(response.incomplete_details, "reason", None)
                         if reason == "max_output_tokens":
-                            raise AnswerError("OpenAI 回覆超過輸出 token 上限（含推理 token）；本題未作答")
+                            raise AnswerError("OpenAI 回覆超過輸出 token 上限；本題未作答")
                         raise AnswerError(f"OpenAI 回覆未完成（{reason or response.status}）；本題未作答")
                     text = response.output_text
                 else:
@@ -111,7 +110,7 @@ class Answerer:
                     )
                     reason = str(response.candidates[0].finish_reason).split(".")[-1] if response.candidates else None
                     if reason == "MAX_TOKENS":
-                        raise AnswerError("Gemini 回覆超過輸出 token 上限（含思考 token）；本題未作答")
+                        raise AnswerError("Gemini 回覆超過輸出 token 上限；本題未作答")
                     if reason != "STOP":
                         raise AnswerError(f"Gemini 回覆未完成或被攔截（{reason or '無候選回覆'}）；本題未作答")
                     text = response.text
